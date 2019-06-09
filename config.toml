@@ -1,3 +1,6 @@
+[cryptokey]
+api_key = "3c3efe2e831e7153df7f980cbc6149c8b61023d5d93c590763cfd7a68e6bc294"
+
 [cryptoendpoints]
 price_single_symbol_price = "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=CAD"
 

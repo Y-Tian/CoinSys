@@ -10,7 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-var apiKey string = "3c3efe2e831e7153df7f980cbc6149c8b61023d5d93c590763cfd7a68e6bc294"
+type CryptoKey struct {
+	CryptoKey string `mapstructure:"api_key"`
+}
+
+type CryptoAPI struct {
+	PriceSingleSymbolSrice string `mapstructure:"price_single_symbol_price"`
+}
 
 type DatabaseConfig struct {
 	Host string `mapstructure:"hostname"`
@@ -19,18 +25,10 @@ type DatabaseConfig struct {
 	Pass string `mapstructure:"password"`
 }
 
-type CryptoAPI struct {
-	PriceSingleSymbolSrice string `mapstructure:"price_single_symbol_price"`
-}
-
-type OutputConfig struct {
-	File string
-}
-
 type Config struct {
-	Db   DatabaseConfig `mapstructure:"database"`
+	CKey CryptoKey      `mapstructure:"cryptokey"`
 	CApi CryptoAPI      `mapstructure:"cryptoendpoints"`
-	Out  OutputConfig   `mapstructure:"output"`
+	Db   DatabaseConfig `mapstructure:"database"`
 }
 
 func Init() {
@@ -50,11 +48,11 @@ func Init() {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	fetch(c.CApi.PriceSingleSymbolSrice)
+	fetch(c.CKey.CryptoKey, c.CApi.PriceSingleSymbolSrice)
 }
 
-func fetch(endpoint string) {
-	resp, err := http.Get(endpoint + "&api_key={" + apiKey + "}")
+func fetch(apikey string, endpoint string) {
+	resp, err := http.Get(endpoint + "&api_key={" + apikey + "}")
 	if err != nil {
 		log.Fatalln(err)
 	}
