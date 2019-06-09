@@ -1,0 +1,6 @@
+[cryptoendpoints]
+price_single_symbol_price = "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=CAD"
+
+[database]
+hostname = "localhost"
+port = "8081"
