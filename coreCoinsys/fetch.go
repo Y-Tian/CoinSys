@@ -1,6 +1,7 @@
 package coreCoinsys
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,28 +9,9 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type CryptoKey struct {
-	CryptoKey string `mapstructure:"api_key"`
-}
-
-type CryptoAPI struct {
-	PriceSingleSymbolSrice string `mapstructure:"price_single_symbol_price"`
-}
-
-type DatabaseConfig struct {
-	Host string `mapstructure:"hostname"`
-	Port string
-	User string `mapstructure:"username"`
-	Pass string `mapstructure:"password"`
-}
-
-type Config struct {
-	CKey CryptoKey      `mapstructure:"cryptokey"`
-	CApi CryptoAPI      `mapstructure:"cryptoendpoints"`
-	Db   DatabaseConfig `mapstructure:"database"`
-}
 
 func Init() {
 	v := viper.New()
@@ -48,7 +30,8 @@ func Init() {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	fetch(c.CKey.CryptoKey, c.CApi.PriceSingleSymbolSrice)
+	fetch(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice)
+	insertMongo()
 }
 
 func fetch(apikey string, endpoint string) {
@@ -63,4 +46,25 @@ func fetch(apikey string, endpoint string) {
 		log.Fatalln(err)
 	}
 	log.Println(string(body))
+}
+
+func insertMongo() {
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
 }
