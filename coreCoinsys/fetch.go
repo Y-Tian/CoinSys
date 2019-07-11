@@ -2,6 +2,7 @@ package coreCoinsys
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Init() {
+type MongoClient struct {
+	MClient *mongo.Client
+}
+
+type CryptoJSON struct {
+	Response   string
+	Type       int
+	Aggregated bool
+	Data       []CoinObject
+	Timeto     int64
+	Timefrom   int64
+}
+
+type CoinObject struct {
+	Time       int64
+	Close      float64
+	High       float64
+	Low        float64
+	Open       float64
+	Volumefrom float64
+	Volumeto   float64
+}
+
+func Fetch() {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("toml")
@@ -30,27 +54,50 @@ func Init() {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	fetch(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice)
-	insertMongo()
+	fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "", c.SetupConfig.MongoDB)
 }
 
-func fetch(apikey string, endpoint string) {
-	resp, err := http.Get(endpoint + "&api_key={" + apikey + "}")
-	if err != nil {
-		log.Fatalln(err)
+func fetchCryptoAPI(apikey string, endpoint string, length string, port string) {
+	switch length {
+	case "all":
+		resp, err := http.Get(endpoint + "&allData=true&api_key={" + apikey + "}")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var cryptojson CryptoJSON
+		json.Unmarshal([]byte(body), &cryptojson)
+		storeCryptoAPI(cryptojson, "All_Time", port)
+	default:
+		resp, err := http.Get(endpoint + "&limit=30&api_key={" + apikey + "}")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var cryptojson CryptoJSON
+		json.Unmarshal([]byte(body), &cryptojson)
+		storeCryptoAPI(cryptojson, "30_days", port)
 	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(string(body))
 }
 
-func insertMongo() {
+func storeCryptoAPI(cryptojson CryptoJSON, length string, port string) {
+	mc := startMongodbClient(port)
+	for _, element := range cryptojson.Data {
+		mc.insertMongodb("test", "BTC_Closing_Value_"+length, element.Close)
+	}
+}
+
+func startMongodbClient(port string) *MongoClient {
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:" + port)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -67,4 +114,22 @@ func insertMongo() {
 	}
 
 	fmt.Println("Connected to MongoDB!")
+
+	cl := MongoClient{
+		MClient: client,
+	}
+	return &cl
+}
+
+func (mc *MongoClient) insertMongodb(dbName string, collection string, elementVal float64) {
+	conn := mc.MClient.Database(dbName).Collection(collection)
+	element := CoinDesc{elementVal}
+	serializedElement := []interface{}{element}
+
+	insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
 }

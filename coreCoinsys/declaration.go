@@ -22,13 +22,11 @@ type Config struct {
 	Db          DatabaseConfig `mapstructure:"database"`
 }
 
-type Trainer struct {
-	Name string
-	Age  int
-	City string
+type CoinDesc struct {
+	Value float64
 }
 
-type CoinDesc struct {
-	Name  string
-	Value float64
+type FindCoinDesc struct {
+	// ID    primitive.ObjectID `bson:"_id"`
+	Value float64 `bson:"value"`
 }
