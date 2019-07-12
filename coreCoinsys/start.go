@@ -37,7 +37,9 @@ func Start() {
 		valuesFromDataset = append(valuesFromDataset, element.Value)
 	}
 
-	findSMA(valuesFromDataset)
+	valuesFromDatasetReversed := reverseArrayOrder(valuesFromDataset)
+	log.Println(valuesFromDatasetReversed)
+	// FindSMA(valuesFromDatasetReversed)
 }
 
 func loadFromMongoClient(dbName string, collection string, port string) []FindCoinDesc {
@@ -79,6 +81,10 @@ func loadFromMongoClient(dbName string, collection string, port string) []FindCo
 	return results
 }
 
-func findSMA(values []float64) {
-	log.Println(values)
+func reverseArrayOrder(input []float64) []float64 {
+	for i := len(input)/2 - 1; i >= 0; i-- {
+		opp := len(input) - 1 - i
+		input[i], input[opp] = input[opp], input[i]
+	}
+	return input
 }
