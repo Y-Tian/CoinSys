@@ -26,7 +26,8 @@ func FindTotalEMA(values []float64, period int) float64 {
 	return EMA
 }
 
-// need all historical values to run forumla, need to return a macd array.
+// need all historical values to run forumla, need to return a macd array
+// must pull all data from coin history
 
 func FindMACD(values []float64) float64 {
 
