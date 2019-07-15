@@ -16,18 +16,25 @@ func FindSingleEMA(iteration int, values []float64, multiplier float64, previous
 	return (values[iteration]-previousEMA)*multiplier + previousEMA
 }
 
-func FindTotalEMA(values []float64, period int) float64 {
+func FindEMA(values []float64, period int) []float64 {
+	var EMA []float64
 	multiplier := FindMultiplier(period)
-	initialSMA := FindSingleSMA(values, period)
-	EMA := FindSingleEMA(0, values, multiplier, initialSMA)
-	for i := 1; i < period; i++ {
-		EMA = FindSingleEMA(i, values, multiplier, EMA)
+	j := 1
+
+	// grab initial SMA
+	SMA := FindSingleSMA(values, period)
+	EMA = append(EMA, SMA)
+
+	// find consecutive EMAs
+	EMA = append(EMA, FindSingleEMA(period, values, multiplier, SMA))
+	var temp float64
+	for _, i := range values[period+1:] {
+		temp = ((i - EMA[j]) * multiplier) + EMA[j]
+		j = j + 1
+		EMA = append(EMA, temp)
 	}
 	return EMA
 }
-
-// need all historical values to run forumla, need to return a macd array
-// must pull all data from coin history
 
 func FindMACD(values []float64) float64 {
 

@@ -32,14 +32,14 @@ func Start() {
 	}
 
 	var valuesFromDataset []float64
-	loadTemp := loadFromMongoClient("test", "BTC_Closing_Value_30_days", c.SetupConfig.MongoDB)
+	// loadTemp := loadFromMongoClient("test", "BTC_Closing_Value_30_days", c.SetupConfig.MongoDB)
+	loadTemp := loadFromMongoClient("test", "BTC_Closing_Value_All_Time", c.SetupConfig.MongoDB)
 	for _, element := range loadTemp {
 		valuesFromDataset = append(valuesFromDataset, element.Value)
 	}
 
-	valuesFromDatasetReversed := reverseArrayOrder(valuesFromDataset)
-	log.Println(valuesFromDatasetReversed)
-	// FindSMA(valuesFromDatasetReversed)
+	log.Println(len(FindEMA(valuesFromDataset, 12)))
+	log.Println(len(FindEMA(valuesFromDataset, 26)))
 }
 
 func loadFromMongoClient(dbName string, collection string, port string) []FindCoinDesc {

@@ -54,7 +54,8 @@ func Fetch() {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "", c.SetupConfig.MongoDB)
+	// fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "", c.SetupConfig.MongoDB)
+	fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "all", c.SetupConfig.MongoDB)
 }
 
 func fetchCryptoAPI(apikey string, endpoint string, length string, port string) {
