@@ -33,43 +33,37 @@ func Start() {
 
 	var closingValuesFromDataset []float64
 	// loadTemp := loadFromMongoClient("test", "BTC_Closing_Value_30_days", c.SetupConfig.MongoDB)
-	loadTempClosingValues := loadFromMongoClient("test", "BTC_Closing_Value_All_Time", c.SetupConfig.MongoDB)
+	loadTempClosingValues := loadFromMongoClientFloat("test", "BTC_Closing_Value_All_Time", c.SetupConfig.MongoDB)
 	for _, element := range loadTempClosingValues {
 		closingValuesFromDataset = append(closingValuesFromDataset, element.Value)
 	}
 
 	var closingTimestampFromDataset []int64
-	loadTempClosingTimestamp := loadFromMongoClient("test", "BTC_Closing_Timestamp_All_Time", c.SetupConfig.MongoDB)
+	loadTempClosingTimestamp := loadFromMongoClientInt("test", "BTC_Closing_Timestamp_All_Time", c.SetupConfig.MongoDB)
 	for _, element := range loadTempClosingTimestamp {
 		closingTimestampFromDataset = append(closingTimestampFromDataset, element.Value)
 	}
 
 	var MACDSlice []float64
-	MACDSlice := FindMACD(closingValuesFromDataset)
+	MACDSlice = FindMACD(closingValuesFromDataset)
 	var timestampSlice []int64
-	timestampSlice := prepTimeAxis(closingTimestampFromDataset, len(MACDSlice))
+	timestampSlice = prepTimeAxis(closingTimestampFromDataset, len(MACDSlice))
+
+	RunGraph(timestampSlice, MACDSlice)
 }
 
-func loadFromMongoClient(dbName string, collection string, port string) []FindCoinDesc {
+func loadFromMongoClientFloat(dbName string, collection string, port string) []FindCoinDescFloat {
 	mc := startMongodbClient(port)
-
 	conn := mc.MClient.Database(dbName).Collection(collection)
+	var results []FindCoinDescFloat
 
-	// Here's an array in which you can store the decoded documents
-	var results []FindCoinDesc
-
-	// Passing bson.D{{}} as the filter matches all documents in the collection
 	cur, err := conn.Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Finding multiple documents returns a cursor
-	// Iterating through the cursor allows us to decode documents one at a time
 	for cur.Next(context.TODO()) {
-
-		// create a value into which the single document can be decoded
-		var elem FindCoinDesc
+		var elem FindCoinDescFloat
 		err := cur.Decode(&elem)
 		if err != nil {
 			log.Fatal(err)
@@ -82,10 +76,35 @@ func loadFromMongoClient(dbName string, collection string, port string) []FindCo
 		log.Fatal(err)
 	}
 
-	// Close the cursor once finished
 	cur.Close(context.TODO())
+	return results
+}
 
-	// fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+func loadFromMongoClientInt(dbName string, collection string, port string) []FindCoinDescInt {
+	mc := startMongodbClient(port)
+	conn := mc.MClient.Database(dbName).Collection(collection)
+	var results []FindCoinDescInt
+
+	cur, err := conn.Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for cur.Next(context.TODO()) {
+		var elem FindCoinDescInt
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		results = append(results, elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
 	return results
 }
 
@@ -108,7 +127,7 @@ func reverseArrayOrderInt(input []int64) []int64 {
 func prepTimeAxis(input []int64, period int) []int64 {
 	var xAxis []int64
 	var temp []int64
-	temp := reverseArrayOrderInt(input)
+	temp = reverseArrayOrderInt(input)
 	for i := 0; i < period; i++ {
 		xAxis = append(xAxis, temp[i])
 	}

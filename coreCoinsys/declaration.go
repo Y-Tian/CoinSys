@@ -22,13 +22,21 @@ type Config struct {
 	Db          DatabaseConfig `mapstructure:"database"`
 }
 
-type CoinDesc struct {
+type CoinDescFloat struct {
 	Value float64
 }
 
-type FindCoinDesc struct {
+type CoinDescInt struct {
+	Value int64
+}
+
+type FindCoinDescFloat struct {
 	// ID    primitive.ObjectID `bson:"_id"`
 	Value float64 `bson:"value"`
+}
+
+type FindCoinDescInt struct {
+	Value int64 `bson:"value"`
 }
 
 type GraphingAxis struct {

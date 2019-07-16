@@ -91,9 +91,11 @@ func fetchCryptoAPI(apikey string, endpoint string, length string, port string) 
 
 func storeCryptoAPI(cryptojson CryptoJSON, length string, port string) {
 	mc := startMongodbClient(port)
+	mc.clearMongodb("test", "BTC_Closing_Value_"+length)
+	mc.clearMongodb("test", "BTC_Closing_Timestamp_"+length)
 	for _, element := range cryptojson.Data {
-		mc.insertMongodb("test", "BTC_Closing_Value_"+length, element.Close)
-		mc.insertMongodb("test", "BTC_Closing_Timestamp_"+length, element.Time)
+		mc.insertMongodbFloat("test", "BTC_Closing_Value_"+length, element.Close)
+		mc.insertMongodbInt("test", "BTC_Closing_Timestamp_"+length, element.Time)
 	}
 }
 
@@ -123,9 +125,9 @@ func startMongodbClient(port string) *MongoClient {
 	return &cl
 }
 
-func (mc *MongoClient) insertMongodb(dbName string, collection string, elementVal float64) {
+func (mc *MongoClient) insertMongodbFloat(dbName string, collection string, elementVal float64) {
 	conn := mc.MClient.Database(dbName).Collection(collection)
-	element := CoinDesc{elementVal}
+	element := CoinDescFloat{elementVal}
 	serializedElement := []interface{}{element}
 
 	insertion, err := conn.InsertMany(context.TODO(), serializedElement)
@@ -134,4 +136,21 @@ func (mc *MongoClient) insertMongodb(dbName string, collection string, elementVa
 	}
 
 	fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
+}
+
+func (mc *MongoClient) insertMongodbInt(dbName string, collection string, elementVal int64) {
+	conn := mc.MClient.Database(dbName).Collection(collection)
+	element := CoinDescInt{elementVal}
+	serializedElement := []interface{}{element}
+
+	insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
+}
+
+func (mc *MongoClient) clearMongodb(dbName string, collection string) {
+	mc.MClient.Database(dbName).Collection(collection).Drop(context.TODO())
 }
