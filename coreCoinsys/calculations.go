@@ -36,6 +36,30 @@ func FindEMA(values []float64, period int) []float64 {
 	return EMA
 }
 
-func FindMACD(values []float64) float64 {
+func FindMACD(values []float64) []float64 {
+	var TwelveEMA []float64
+	var TwentySixEMA []float64
+	var MACD []float64
 
+	TwelveEMA = FindEMA(values, 12)
+	TwentySixEMA = FindEMA(values, 26)
+
+	offset := len(TwelveEMA) - len(TwentySixEMA)
+	for i := 0; i < len(TwentySixEMA); i++ {
+		MACD = append(MACD, TwelveEMA[offset+i]-TwentySixEMA[i])
+	}
+	return MACD
+}
+
+func FindSignalLine(MACDValues []float64) []float64 {
+	return FindEMA(MACDValues, 9)
+}
+
+func FindHistogram(MACDValues []float64, SignalLineValues []float64) []float64 {
+	var histogram []float64
+	offset := len(MACDValues) - len(SignalLineValues)
+	for i := 0; i < len(SignalLineValues); i++ {
+		histogram = append(histogram, MACDValues[offset+i]-SignalLineValues[i])
+	}
+	return histogram
 }
