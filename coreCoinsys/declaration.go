@@ -40,6 +40,8 @@ type FindCoinDescInt struct {
 }
 
 type GraphingAxis struct {
-	XAxis []int64
-	YAxis []float64
+	TimestampXAxis []int64
+	MACDYAxis      []float64
+	SignalYAxis    []float64
+	HistogramYAxis []float64
 }
