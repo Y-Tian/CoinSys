@@ -93,6 +93,7 @@ func storeCryptoAPI(cryptojson CryptoJSON, length string, port string) {
 	mc := startMongodbClient(port)
 	for _, element := range cryptojson.Data {
 		mc.insertMongodb("test", "BTC_Closing_Value_"+length, element.Close)
+		mc.insertMongodb("test", "BTC_Closing_Timestamp_"+length, element.Time)
 	}
 }
 

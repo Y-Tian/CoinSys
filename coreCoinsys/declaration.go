@@ -30,3 +30,8 @@ type FindCoinDesc struct {
 	// ID    primitive.ObjectID `bson:"_id"`
 	Value float64 `bson:"value"`
 }
+
+type GraphingAxis struct {
+	XAxis []int64
+	YAxis []float64
+}
