@@ -44,12 +44,19 @@ func Start() {
 		closingTimestampFromDataset = append(closingTimestampFromDataset, element.Value)
 	}
 
+	var TimestampSlice []int64
 	var MACDSlice []float64
+	var SignalSlice []float64
+	var HistogramSlice []float64
 	MACDSlice = FindMACD(closingValuesFromDataset)
-	var timestampSlice []int64
-	timestampSlice = prepTimeAxis(closingTimestampFromDataset, len(MACDSlice))
+	TimestampSlice = prepTimeAxis(closingTimestampFromDataset, len(MACDSlice))
+	SignalSlice = FindSignalLine(MACDSlice)
+	HistogramSlice = FindHistogram(MACDSlice, SignalSlice)
+	sliceOffset := len(MACDSlice) - len(HistogramSlice)
+	MACDSlice = MACDSlice[sliceOffset:]
+	TimestampSlice = TimestampSlice[sliceOffset:]
 
-	RunGraph(timestampSlice, MACDSlice)
+	RunGraph(TimestampSlice, MACDSlice, SignalSlice, HistogramSlice)
 }
 
 func loadFromMongoClientFloat(dbName string, collection string, port string) []FindCoinDescFloat {
