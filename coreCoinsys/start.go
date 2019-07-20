@@ -2,6 +2,7 @@ package coreCoinsys
 
 import (
 	"context"
+	_ "expvar"
 	"fmt"
 	"log"
 	"os"
