@@ -66,6 +66,7 @@ func FindHistogram(MACDValues []float64, SignalLineValues []float64) []float64 {
 
 // func BuyOrSellGivenPeriod(HistogramValues []float64, period int) result string {
 // 	// use a noise reduction slope calculator
+// // possibly use interpolation
 // 	var res string
 // 	return res
 // }
