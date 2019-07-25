@@ -13,3 +13,5 @@ Only developing with the testing branch. Currently developing a mongodb api wrap
 `coinsys test`
 
 # Future implementations
+
+Will produce a graph that shows least squares interpolating line. This way, we can reduce the noise from the MACD histogram slopes to produce more accurate trends.
