@@ -1,5 +1,9 @@
 # What this tool does
 
+Pulls the dataset from a cryptocurrency API to get live data such as Bitcoin. This tool runs the MACD technical analysis on that dataset to generate a histogram. Using the historgram, the tool can generate slopes with denoising functions.
+
+TLDR; find a coin you want to invest in? Run this technical analysis tool to find out if the coin is trending in a profitable direction!
+
 # Quick setup
 
 Configure GO 11 and run `source ~/.bashrc`. Build and install with `make all`.
