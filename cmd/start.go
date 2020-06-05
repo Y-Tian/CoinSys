@@ -33,8 +33,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading in data from mongodb!")
-		coreCoinsys.Start()
+		length := args[0]
+		fmt.Println("Loading in data from mongodb for the time period: ", length)
+		coreCoinsys.Start(length)
 	},
 }
 

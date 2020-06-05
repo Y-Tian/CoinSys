@@ -1,6 +1,13 @@
 package coreCoinsys
 
+import (
+	"log"
+)
+
 func FindSingleSMA(values []float64, period int) float64 {
+	if len(values) < period {
+		log.Fatalln("values array is smaller than period, corrupted data")
+	}
 	sum := float64(0)
 	for i := 0; i < period; i++ {
 		sum = sum + values[i]

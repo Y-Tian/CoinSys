@@ -37,7 +37,7 @@ type CoinObject struct {
 	Volumeto   float64
 }
 
-func Fetch() {
+func Fetch(length string) {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("toml")
@@ -54,8 +54,7 @@ func Fetch() {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	// fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "", c.SetupConfig.MongoDB)
-	fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, "all", c.SetupConfig.MongoDB)
+	fetchCryptoAPI(c.SetupConfig.CryptoKey, c.CApi.PriceSingleSymbolSrice, length, c.SetupConfig.MongoDB)
 }
 
 func fetchCryptoAPI(apikey string, endpoint string, length string, port string) {
@@ -72,9 +71,10 @@ func fetchCryptoAPI(apikey string, endpoint string, length string, port string) 
 		}
 		var cryptojson CryptoJSON
 		json.Unmarshal([]byte(body), &cryptojson)
-		storeCryptoAPI(cryptojson, "All_Time", port)
+		storeCryptoAPI(cryptojson, "all_days", port)
 	default:
-		resp, err := http.Get(endpoint + "&limit=30&api_key={" + apikey + "}")
+		url := fmt.Sprintf("&limit=%s&api_key={", length)
+		resp, err := http.Get(endpoint + url + apikey + "}")
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -85,7 +85,7 @@ func fetchCryptoAPI(apikey string, endpoint string, length string, port string) 
 		}
 		var cryptojson CryptoJSON
 		json.Unmarshal([]byte(body), &cryptojson)
-		storeCryptoAPI(cryptojson, "30_days", port)
+		storeCryptoAPI(cryptojson, fmt.Sprintf("%s_days", length), port)
 	}
 }
 
@@ -117,8 +117,6 @@ func startMongodbClient(port string) *MongoClient {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Connected to MongoDB!")
-
 	cl := MongoClient{
 		MClient: client,
 	}
@@ -130,12 +128,13 @@ func (mc *MongoClient) insertMongodbFloat(dbName string, collection string, elem
 	element := CoinDescFloat{elementVal}
 	serializedElement := []interface{}{element}
 
-	insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	// insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	_, err := conn.InsertMany(context.TODO(), serializedElement)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
+	// fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
 }
 
 func (mc *MongoClient) insertMongodbInt(dbName string, collection string, elementVal int64) {
@@ -143,12 +142,13 @@ func (mc *MongoClient) insertMongodbInt(dbName string, collection string, elemen
 	element := CoinDescInt{elementVal}
 	serializedElement := []interface{}{element}
 
-	insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	// insertion, err := conn.InsertMany(context.TODO(), serializedElement)
+	_, err := conn.InsertMany(context.TODO(), serializedElement)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
+	// fmt.Println("Inserted multiple documents: ", insertion.InsertedIDs)
 }
 
 func (mc *MongoClient) clearMongodb(dbName string, collection string) {

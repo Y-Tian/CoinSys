@@ -15,7 +15,7 @@ type Dataset struct {
 	ClosingPrices []int
 }
 
-func Start() {
+func Start(length string) {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("toml")
@@ -33,14 +33,13 @@ func Start() {
 	}
 
 	var closingValuesFromDataset []float64
-	// loadTemp := loadFromMongoClient("test", "BTC_Closing_Value_30_days", c.SetupConfig.MongoDB)
-	loadTempClosingValues := loadFromMongoClientFloat("test", "BTC_Closing_Value_All_Time", c.SetupConfig.MongoDB)
+	loadTempClosingValues := loadFromMongoClientFloat("test", fmt.Sprintf("BTC_Closing_Value_%s_days", length), c.SetupConfig.MongoDB)
 	for _, element := range loadTempClosingValues {
 		closingValuesFromDataset = append(closingValuesFromDataset, element.Value)
 	}
 
 	var closingTimestampFromDataset []int64
-	loadTempClosingTimestamp := loadFromMongoClientInt("test", "BTC_Closing_Timestamp_All_Time", c.SetupConfig.MongoDB)
+	loadTempClosingTimestamp := loadFromMongoClientInt("test", fmt.Sprintf("BTC_Closing_Timestamp_%s_days", length), c.SetupConfig.MongoDB)
 	for _, element := range loadTempClosingTimestamp {
 		closingTimestampFromDataset = append(closingTimestampFromDataset, element.Value)
 	}
@@ -57,6 +56,9 @@ func Start() {
 	MACDSlice = MACDSlice[sliceOffset:]
 	TimestampSlice = TimestampSlice[sliceOffset:]
 
+	fmt.Println("Please visit localhost:8080 to see a visualization.")
+	fmt.Println("Reminder: your visualization will be delayed 30 days due to the nature of the MACD indicator." +
+		"Please fetch your data range accordingly.")
 	RunGraph(TimestampSlice, MACDSlice, SignalSlice, HistogramSlice)
 }
 
